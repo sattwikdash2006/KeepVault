@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,16 @@
       theme: {
         extend: {
           colors: {
-            brand: { 500: '#f59e0b', 600: '#d97706' },
+            peach: {
+              50: '#fff9f5',
+              100: '#fff3ec',
+              200: '#ffe4d3',
+              300: '#ffd0b5',
+              400: '#fba57a',
+              500: '#f87b47',
+              600: '#ea5a24'
+            },
+            brand: { 500: '#f97316', 600: '#ea580c' },
             dark: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
           }
         }
@@ -20,12 +29,26 @@
     }
   </script>
   <style>
-    /* Custom scrollbar and animations */
+    /* Custom scrollbar and glass styling */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
-    .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .light .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(0, 0, 0, 0.06); }
+    ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.25); border-radius: 9999px; }
+    
+    /* Frosted glass calibrated for the Light Peach live background */
+    .glass {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -5px rgba(249, 115, 22, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    }
+    .dark .glass {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+    }
+
     .masonry-grid { column-count: 1; column-gap: 1rem; }
     @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
     @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
@@ -35,109 +58,112 @@
     .scanner-line { animation: scan 2s linear infinite; }
   </style>
 </head>
-<body class="bg-dark-950 text-slate-100 min-h-screen antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+<body class="bg-[#FFF3EC] text-slate-800 dark:bg-dark-950 dark:text-slate-100 min-h-screen antialiased selection:bg-peach-400 selection:text-white transition-colors duration-300 relative overflow-x-hidden font-sans">
+
+  <!-- ================= DYNAMIC LIVE CANVAS BACKGROUND ================= -->
+  <canvas id="liveBgCanvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full"></canvas>
 
   <!-- ================= AUTH & ONBOARDING SCREENS ================= -->
-  <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-    <div class="glass w-full max-w-md p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+  <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-peach-900/20 dark:bg-black/85 backdrop-blur-md p-4">
+    <div class="glass w-full max-w-md p-8 rounded-3xl shadow-2xl relative overflow-hidden text-slate-800 dark:text-slate-100 z-10">
       <!-- Glow Decor -->
-      <div class="absolute -top-16 -right-16 w-36 h-36 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-16 -right-16 w-36 h-36 bg-peach-400/30 rounded-full blur-3xl pointer-events-none"></div>
       
       <!-- Brand Logo -->
       <div class="flex items-center justify-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-dark-950 shadow-lg shadow-amber-500/30">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-peach-500 to-amber-300 flex items-center justify-center text-white shadow-lg shadow-peach-500/30">
           <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
         </div>
-        <h1 class="text-2xl font-bold tracking-tight">Vault<span class="text-amber-500">Keep</span></h1>
+        <h1 class="text-2xl font-bold tracking-tight">Vault<span class="text-peach-500">Keep</span></h1>
       </div>
 
       <!-- STEP 1: Phone Entry -->
       <div id="authPhoneStep" class="auth-step space-y-4">
         <h2 class="text-xl font-semibold text-center">First-Time Registration</h2>
-        <p class="text-xs text-slate-400 text-center">Enter your mobile number to initialize your zero-leakage local vault.</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 text-center">Enter your mobile number to initialize your zero-leakage local vault.</p>
         <div class="space-y-2">
-          <label class="text-xs uppercase font-medium text-slate-400">Phone Number</label>
+          <label class="text-xs uppercase font-medium text-slate-500 dark:text-slate-400">Phone Number</label>
           <div class="flex gap-2">
-            <span class="px-3 py-2 bg-slate-800 rounded-xl text-sm border border-slate-700 flex items-center">+1</span>
-            <input id="inputPhone" type="tel" placeholder="(555) 000-0000" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+            <span class="px-3 py-2 bg-white/70 dark:bg-slate-800 rounded-xl text-sm border border-peach-200 dark:border-slate-700 flex items-center font-medium">+1</span>
+            <input id="inputPhone" type="tel" placeholder="(555) 000-0000" class="flex-1 bg-white/80 dark:bg-slate-900 border border-peach-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-peach-500 shadow-sm">
           </div>
         </div>
-        <button onclick="Auth.requestOtp()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-dark-950 font-semibold rounded-xl transition shadow-lg shadow-amber-500/20">Send Verification Code</button>
+        <button onclick="Auth.requestOtp()" class="w-full py-3 bg-peach-500 hover:bg-peach-600 text-white font-semibold rounded-xl transition shadow-lg shadow-peach-500/25 active:scale-[0.98]">Send Verification Code</button>
       </div>
 
       <!-- STEP 2: Simulated OTP Verification -->
       <div id="authOtpStep" class="auth-step hidden space-y-4">
         <h2 class="text-xl font-semibold text-center">Enter Verification Code</h2>
-        <p class="text-xs text-slate-400 text-center" id="otpNotice">A simulated 6-digit code has been generated.</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 text-center" id="otpNotice">A simulated 6-digit code has been generated.</p>
         <div class="flex justify-center gap-2 my-4">
-          <input type="text" maxlength="6" id="inputOtp" class="w-48 text-center tracking-[0.5em] text-2xl font-mono py-2 bg-slate-900 border border-slate-700 rounded-xl focus:border-amber-500 outline-none">
+          <input type="text" maxlength="6" id="inputOtp" class="w-48 text-center tracking-[0.5em] text-2xl font-mono py-2 bg-white/80 dark:bg-slate-900 border border-peach-200 dark:border-slate-700 rounded-xl focus:border-peach-500 outline-none text-slate-800 dark:text-white shadow-sm">
         </div>
-        <button onclick="Auth.verifyOtp()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-dark-950 font-semibold rounded-xl transition">Verify & Proceed</button>
+        <button onclick="Auth.verifyOtp()" class="w-full py-3 bg-peach-500 hover:bg-peach-600 text-white font-semibold rounded-xl transition shadow-lg shadow-peach-500/25 active:scale-[0.98]">Verify & Proceed</button>
       </div>
 
       <!-- STEP 3: 6-Digit Master PIN Setup / Entry -->
       <div id="authPinStep" class="auth-step hidden space-y-4">
         <h2 class="text-xl font-semibold text-center" id="pinTitle">Enter Master 6-Digit PIN</h2>
-        <p class="text-xs text-slate-400 text-center" id="pinSubtitle">Used to derive your hardware-accelerated AES-256-GCM encryption key.</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 text-center" id="pinSubtitle">Used to derive your hardware-accelerated AES-256-GCM encryption key.</p>
         
         <!-- PIN Dots Display -->
         <div class="flex justify-center gap-3 my-4">
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
-          <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-600"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
+          <div class="pin-dot w-4 h-4 rounded-full border-2 border-peach-300 dark:border-slate-600 transition-colors"></div>
         </div>
 
         <!-- Numeric Keypad -->
         <div class="grid grid-cols-3 gap-2.5 max-w-[260px] mx-auto pt-2">
-          <button onclick="Auth.tapPin('1')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">1</button>
-          <button onclick="Auth.tapPin('2')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">2</button>
-          <button onclick="Auth.tapPin('3')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">3</button>
-          <button onclick="Auth.tapPin('4')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">4</button>
-          <button onclick="Auth.tapPin('5')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">5</button>
-          <button onclick="Auth.tapPin('6')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">6</button>
-          <button onclick="Auth.tapPin('7')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">7</button>
-          <button onclick="Auth.tapPin('8')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">8</button>
-          <button onclick="Auth.tapPin('9')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">9</button>
-          <button onclick="Auth.promptBiometricUnlock()" id="btnBiometricQuick" class="h-12 rounded-xl bg-slate-800/40 hover:bg-slate-700 text-amber-400 flex items-center justify-center active:scale-95 transition" title="Biometric Unlock">
+          <button onclick="Auth.tapPin('1')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">1</button>
+          <button onclick="Auth.tapPin('2')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">2</button>
+          <button onclick="Auth.tapPin('3')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">3</button>
+          <button onclick="Auth.tapPin('4')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">4</button>
+          <button onclick="Auth.tapPin('5')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">5</button>
+          <button onclick="Auth.tapPin('6')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">6</button>
+          <button onclick="Auth.tapPin('7')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">7</button>
+          <button onclick="Auth.tapPin('8')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">8</button>
+          <button onclick="Auth.tapPin('9')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">9</button>
+          <button onclick="Auth.promptBiometricUnlock()" id="btnBiometricQuick" class="h-12 rounded-xl bg-peach-100/60 dark:bg-slate-800/40 hover:bg-peach-200/60 dark:hover:bg-slate-700 text-peach-600 dark:text-amber-400 flex items-center justify-center active:scale-95 transition" title="Biometric Unlock">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8.003 8.003 0 0115.357-2m-1.557 5H15"/></svg>
           </button>
-          <button onclick="Auth.tapPin('0')" class="h-12 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-lg font-medium active:scale-95 transition">0</button>
-          <button onclick="Auth.clearPin()" class="h-12 rounded-xl bg-slate-800/40 hover:bg-slate-700 text-rose-400 flex items-center justify-center active:scale-95 transition" title="Clear">
+          <button onclick="Auth.tapPin('0')" class="h-12 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-peach-100 dark:hover:bg-slate-700 text-lg font-medium active:scale-95 transition shadow-sm border border-peach-200/50 dark:border-transparent">0</button>
+          <button onclick="Auth.clearPin()" class="h-12 rounded-xl bg-peach-100/60 dark:bg-slate-800/40 hover:bg-peach-200/60 dark:hover:bg-slate-700 text-rose-500 flex items-center justify-center active:scale-95 transition" title="Clear">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/></svg>
           </button>
         </div>
 
-        <div class="flex items-center justify-between text-xs pt-3 text-slate-400">
-          <button onclick="Auth.startFaceUnlock()" class="hover:text-amber-400 flex items-center gap-1.5 transition">
+        <div class="flex items-center justify-between text-xs pt-3 text-slate-500 dark:text-slate-400">
+          <button onclick="Auth.startFaceUnlock()" class="hover:text-peach-600 dark:hover:text-amber-400 flex items-center gap-1.5 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Face Unlock
           </button>
-          <button onclick="Auth.forgotPinPrompt()" class="hover:text-rose-400 transition">Forgot PIN?</button>
+          <button onclick="Auth.forgotPinPrompt()" class="hover:text-rose-500 transition">Forgot PIN?</button>
         </div>
       </div>
 
-      <!-- STEP 4: Biometric Setup Modal (First login setup prompt) -->
+      <!-- STEP 4: Biometric Setup Modal -->
       <div id="authBiometricSetupStep" class="auth-step hidden space-y-4 text-center">
         <h2 class="text-xl font-semibold">Enhance Security</h2>
-        <p class="text-xs text-slate-400">Register hardware Biometrics (Fingerprint/WebAuthn) or Face ID to quickly unlock your vault in the future.</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Register hardware Biometrics (Fingerprint/WebAuthn) or Face ID to quickly unlock your vault in the future.</p>
         <div class="grid grid-cols-2 gap-3 pt-2">
-          <button onclick="Auth.registerWebAuthn()" class="p-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-center flex flex-col items-center gap-2 group transition">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-400 flex items-center justify-center">
+          <button onclick="Auth.registerWebAuthn()" class="p-4 rounded-2xl bg-white/70 dark:bg-slate-800 hover:bg-peach-100 dark:hover:bg-slate-700 border border-peach-200 dark:border-slate-700 text-center flex flex-col items-center gap-2 group transition">
+            <div class="w-12 h-12 rounded-xl bg-peach-500/10 group-hover:bg-peach-500/20 text-peach-600 dark:text-amber-400 flex items-center justify-center">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8.003 8.003 0 0115.357-2m-1.557 5H15"/></svg>
             </div>
             <span class="text-xs font-semibold">Fingerprint / Key</span>
           </button>
-          <button onclick="Auth.setupFaceLock()" class="p-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-center flex flex-col items-center gap-2 group transition">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-400 flex items-center justify-center">
+          <button onclick="Auth.setupFaceLock()" class="p-4 rounded-2xl bg-white/70 dark:bg-slate-800 hover:bg-peach-100 dark:hover:bg-slate-700 border border-peach-200 dark:border-slate-700 text-center flex flex-col items-center gap-2 group transition">
+            <div class="w-12 h-12 rounded-xl bg-peach-500/10 group-hover:bg-peach-500/20 text-peach-600 dark:text-amber-400 flex items-center justify-center">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <span class="text-xs font-semibold">Face Camera</span>
           </button>
         </div>
-        <button onclick="Auth.finishOnboarding()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs text-slate-300">Skip For Now</button>
+        <button onclick="Auth.finishOnboarding()" class="w-full py-2.5 bg-white/60 dark:bg-slate-800 hover:bg-peach-100 dark:hover:bg-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-300">Skip For Now</button>
       </div>
 
     </div>
@@ -145,43 +171,43 @@
 
   <!-- Face Recognition Scanner Overlay Modal -->
   <div id="faceScanModal" class="fixed inset-0 z-50 bg-black/95 hidden flex-col items-center justify-center p-4">
-    <div class="relative w-72 h-72 sm:w-80 sm:h-80 rounded-3xl overflow-hidden border-2 border-amber-500 shadow-2xl shadow-amber-500/20">
+    <div class="relative w-72 h-72 sm:w-80 sm:h-80 rounded-3xl overflow-hidden border-2 border-peach-500 shadow-2xl shadow-peach-500/30">
       <video id="faceVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-      <div class="absolute inset-0 border-4 border-dashed border-amber-400/50 rounded-3xl pointer-events-none"></div>
-      <div class="scanner-line absolute left-0 right-0 h-1 bg-amber-400 shadow-[0_0_15px_#f59e0b]"></div>
+      <div class="absolute inset-0 border-4 border-dashed border-peach-400/50 rounded-3xl pointer-events-none"></div>
+      <div class="scanner-line absolute left-0 right-0 h-1 bg-peach-400 shadow-[0_0_15px_#f87b47]"></div>
     </div>
-    <p id="faceScanStatus" class="mt-6 text-sm font-mono text-amber-400 tracking-wider">INITIALIZING OPTICAL SCANNER...</p>
+    <p id="faceScanStatus" class="mt-6 text-sm font-mono text-peach-400 tracking-wider">INITIALIZING OPTICAL SCANNER...</p>
     <button onclick="Auth.stopFaceUnlock()" class="mt-4 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-full text-xs text-slate-300">Cancel</button>
   </div>
 
 
   <!-- ================= MAIN APP LAYOUT ================= -->
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col relative z-10">
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-30 glass border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
+    <header class="sticky top-0 z-30 glass border-b border-peach-200/60 dark:border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
       <!-- Left: Logo & Mobile Sidebar Trigger -->
       <div class="flex items-center gap-3">
-        <button onclick="App.toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-slate-800 text-slate-400">
+        <button onclick="App.toggleSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-peach-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-dark-950 font-black shadow-md shadow-amber-500/20">V</div>
-          <span class="text-lg font-bold tracking-tight hidden sm:inline">Vault<span class="text-amber-500">Keep</span></span>
+          <div class="w-9 h-9 rounded-xl bg-peach-500 flex items-center justify-center text-white font-black shadow-md shadow-peach-500/30">V</div>
+          <span class="text-lg font-bold tracking-tight hidden sm:inline text-slate-800 dark:text-slate-100">Vault<span class="text-peach-500">Keep</span></span>
         </div>
       </div>
 
       <!-- Center: Universal Search Bar -->
       <div class="flex-1 max-w-2xl relative">
         <svg class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" id="searchInput" oninput="App.renderNotes()" placeholder="Search encrypted notes, tags, checklists..." class="w-full bg-slate-900/80 border border-slate-800 focus:border-amber-500/80 pl-11 pr-4 py-2 rounded-2xl text-sm focus:outline-none transition">
+        <input type="text" id="searchInput" oninput="App.renderNotes()" placeholder="Search encrypted notes, tags, checklists..." class="w-full bg-white/70 dark:bg-slate-900/80 border border-peach-200 dark:border-slate-800 focus:border-peach-500 pl-11 pr-4 py-2 rounded-2xl text-sm focus:outline-none transition shadow-sm text-slate-800 dark:text-slate-100">
       </div>
 
-      <!-- Right: Actions & Profile -->
+      <!-- Right: Actions & Lock -->
       <div class="flex items-center gap-2">
-        <button onclick="App.toggleDarkMode()" class="p-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" title="Toggle Theme">
+        <button onclick="App.toggleDarkMode()" class="p-2.5 rounded-xl hover:bg-peach-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-peach-600 transition" title="Toggle Theme">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
-        <button onclick="Auth.lockSession()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold transition" title="Lock App Now">
+        <button onclick="Auth.lockSession()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold transition" title="Lock App Now">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
           <span class="hidden md:inline">Lock</span>
         </button>
@@ -191,44 +217,44 @@
     <!-- App Body: Sidebar + Main Content Canvas -->
     <div class="flex-1 flex overflow-hidden">
       <!-- Sidebar -->
-      <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-dark-900 lg:bg-transparent border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 flex flex-col p-4">
+      <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 glass lg:bg-transparent border-r border-peach-200/60 dark:border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 flex flex-col p-4">
         <nav class="space-y-1.5 flex-1">
-          <button onclick="App.setView('notes')" id="nav-notes" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition bg-amber-500/10 text-amber-400">
+          <button onclick="App.setView('notes')" id="nav-notes" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition bg-peach-500/15 text-peach-600 dark:text-peach-400 font-semibold">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             All Notes
           </button>
-          <button onclick="App.setView('vault')" id="nav-vault" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium text-slate-400 hover:bg-slate-800 transition">
+          <button onclick="App.setView('vault')" id="nav-vault" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-peach-100/70 dark:hover:bg-slate-800 transition">
             <div class="flex items-center gap-3">
-              <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <svg class="w-5 h-5 text-peach-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
               <span>Secure Locker</span>
             </div>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">2x Enc</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-peach-500/20 text-peach-600 dark:text-peach-400">2x Enc</span>
           </button>
-          <button onclick="App.setView('archive')" id="nav-archive" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-400 hover:bg-slate-800 transition">
+          <button onclick="App.setView('archive')" id="nav-archive" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-peach-100/70 dark:hover:bg-slate-800 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
             Archive
           </button>
-          <button onclick="App.setView('trash')" id="nav-trash" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-400 hover:bg-slate-800 transition">
+          <button onclick="App.setView('trash')" id="nav-trash" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-peach-100/70 dark:hover:bg-slate-800 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             Trash
           </button>
 
           <!-- Dynamic Label Filters -->
           <div class="pt-6">
-            <div class="flex items-center justify-between px-3 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div class="flex items-center justify-between px-3 pb-2 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
               <span>Labels</span>
-              <button onclick="App.promptAddLabel()" class="hover:text-amber-400">+</button>
+              <button onclick="App.promptAddLabel()" class="hover:text-peach-600 dark:hover:text-amber-400 font-bold">+</button>
             </div>
             <div id="labelsList" class="space-y-1"></div>
           </div>
         </nav>
 
-        <div class="pt-4 border-t border-slate-800/80 text-xs text-slate-500 flex items-center justify-between">
-          <span class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+        <div class="pt-4 border-t border-peach-200/60 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+          <span class="flex items-center gap-1.5 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
             AES-256 E2E Active
           </span>
-          <span>v2.4</span>
+          <span class="font-mono">v2.5</span>
         </div>
       </aside>
 
@@ -236,90 +262,90 @@
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-8">
         
         <!-- Google Keep Interactive Expanded Note Input Box -->
-        <div id="composerCard" class="max-w-2xl mx-auto glass rounded-2xl p-4 shadow-xl border border-slate-800 transition-all duration-300">
-          <input type="text" id="noteTitle" placeholder="Title" class="w-full bg-transparent font-semibold text-lg placeholder-slate-500 outline-none mb-2 hidden">
-          <textarea id="noteContent" rows="1" placeholder="Take a note..." onfocus="App.expandComposer()" class="w-full bg-transparent text-sm resize-none placeholder-slate-500 outline-none leading-relaxed"></textarea>
+        <div id="composerCard" class="max-w-2xl mx-auto glass rounded-2xl p-4 shadow-xl border border-peach-200/70 dark:border-slate-800 transition-all duration-300">
+          <input type="text" id="noteTitle" placeholder="Title" class="w-full bg-transparent font-semibold text-lg placeholder-slate-400 outline-none mb-2 hidden text-slate-800 dark:text-slate-100">
+          <textarea id="noteContent" rows="1" placeholder="Take a note..." onfocus="App.expandComposer()" class="w-full bg-transparent text-sm resize-none placeholder-slate-400 outline-none leading-relaxed text-slate-800 dark:text-slate-100"></textarea>
           
-          <!-- Dynamic Checklist Area (hidden by default) -->
+          <!-- Dynamic Checklist Area -->
           <div id="composerChecklist" class="space-y-1.5 hidden mb-3"></div>
 
           <!-- Attachments Previews -->
           <div id="composerAttachments" class="flex flex-wrap gap-2 mb-3"></div>
 
-          <!-- Voice Recording Visualizer bar (if active) -->
-          <div id="recorderBar" class="hidden items-center justify-between bg-rose-500/10 border border-rose-500/30 px-3 py-2 rounded-xl mb-3 text-xs text-rose-400">
+          <!-- Voice Recording Visualizer bar -->
+          <div id="recorderBar" class="hidden items-center justify-between bg-rose-500/10 border border-rose-500/30 px-3 py-2 rounded-xl mb-3 text-xs text-rose-500 font-medium">
             <span class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
               Recording Audio Note...
             </span>
-            <button onclick="App.stopAudioRecording()" class="font-bold underline hover:text-white">Save Voice</button>
+            <button onclick="App.stopAudioRecording()" class="font-bold underline hover:text-rose-700">Save Voice</button>
           </div>
 
           <!-- Bottom Action Toolbar -->
-          <div id="composerToolbar" class="flex items-center justify-between pt-2 border-t border-slate-800/60 hidden">
-            <div class="flex items-center gap-1 text-slate-400">
-              <!-- Color Palette Picker -->
+          <div id="composerToolbar" class="flex items-center justify-between pt-2 border-t border-peach-200/60 dark:border-slate-800/60 hidden">
+            <div class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+              <!-- Color Palette Picker (Soft Peach Friendly Tones) -->
               <div class="relative group">
-                <button class="p-2 hover:bg-slate-800 rounded-xl hover:text-slate-200" title="Background Color">
+                <button class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-slate-700 transition" title="Background Color">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4 4 4 0 014-4h10a4 4 0 014 4 4 4 0 01-4 4H7zm0 0l4-4m-4 4l-4-4"/></svg>
                 </button>
-                <div class="absolute bottom-full left-0 mb-2 p-2 bg-slate-900 border border-slate-700 rounded-xl hidden group-hover:flex gap-1.5 shadow-xl z-20">
-                  <div onclick="App.setComposerColor('#1e293b')" class="w-5 h-5 rounded-full bg-slate-800 border border-slate-600 cursor-pointer hover:scale-110"></div>
-                  <div onclick="App.setComposerColor('#7f1d1d')" class="w-5 h-5 rounded-full bg-red-900 cursor-pointer hover:scale-110"></div>
-                  <div onclick="App.setComposerColor('#78350f')" class="w-5 h-5 rounded-full bg-amber-900 cursor-pointer hover:scale-110"></div>
-                  <div onclick="App.setComposerColor('#14532d')" class="w-5 h-5 rounded-full bg-emerald-900 cursor-pointer hover:scale-110"></div>
-                  <div onclick="App.setComposerColor('#1e3a8a')" class="w-5 h-5 rounded-full bg-blue-900 cursor-pointer hover:scale-110"></div>
-                  <div onclick="App.setComposerColor('#581c87')" class="w-5 h-5 rounded-full bg-purple-900 cursor-pointer hover:scale-110"></div>
+                <div class="absolute bottom-full left-0 mb-2 p-2 bg-white/95 dark:bg-slate-900 border border-peach-200 dark:border-slate-700 rounded-xl hidden group-hover:flex gap-1.5 shadow-xl z-20">
+                  <div onclick="App.setComposerColor('#ffffff')" class="w-5 h-5 rounded-full bg-white border border-slate-300 cursor-pointer hover:scale-110" title="Default White"></div>
+                  <div onclick="App.setComposerColor('#fff1e6')" class="w-5 h-5 rounded-full bg-[#fff1e6] border border-peach-200 cursor-pointer hover:scale-110" title="Warm Peach"></div>
+                  <div onclick="App.setComposerColor('#fde2e4')" class="w-5 h-5 rounded-full bg-[#fde2e4] border border-rose-200 cursor-pointer hover:scale-110" title="Soft Blossom"></div>
+                  <div onclick="App.setComposerColor('#e2ece9')" class="w-5 h-5 rounded-full bg-[#e2ece9] border border-emerald-200 cursor-pointer hover:scale-110" title="Mint Fog"></div>
+                  <div onclick="App.setComposerColor('#dfe7fd')" class="w-5 h-5 rounded-full bg-[#dfe7fd] border border-blue-200 cursor-pointer hover:scale-110" title="Soft Periwinkle"></div>
+                  <div onclick="App.setComposerColor('#fbf8cc')" class="w-5 h-5 rounded-full bg-[#fbf8cc] border border-amber-200 cursor-pointer hover:scale-110" title="Pale Sun"></div>
                 </div>
               </div>
 
               <!-- Attach Files (Image, Video, Doc, PDF) -->
-              <label class="p-2 hover:bg-slate-800 rounded-xl hover:text-slate-200 cursor-pointer" title="Add File / Image / Doc">
+              <label class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-slate-700 cursor-pointer transition" title="Add File / Image / Doc">
                 <input type="file" id="filePicker" multiple onchange="App.handleFileUpload(event)" class="hidden">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
               </label>
 
               <!-- Voice Recording Button -->
-              <button onclick="App.toggleAudioRecording()" class="p-2 hover:bg-slate-800 rounded-xl hover:text-rose-400" title="Audio Memo">
+              <button onclick="App.toggleAudioRecording()" class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-rose-500 transition" title="Audio Memo">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
               </button>
 
               <!-- Checklist Toggle -->
-              <button onclick="App.addChecklistItem()" class="p-2 hover:bg-slate-800 rounded-xl hover:text-slate-200" title="Add Checklist Item">
+              <button onclick="App.addChecklistItem()" class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-slate-700 transition" title="Add Checklist Item">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
               </button>
 
               <!-- Tag/Label Selector -->
-              <button onclick="App.addNoteTagPrompt()" class="p-2 hover:bg-slate-800 rounded-xl hover:text-slate-200" title="Attach Tag">
+              <button onclick="App.addNoteTagPrompt()" class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-slate-700 transition" title="Attach Tag">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
               </button>
 
-              <!-- Save to Secure Locker (2x Encrypted) Toggle -->
-              <button onclick="App.toggleComposerVault()" id="btnComposerVault" class="p-2 hover:bg-slate-800 rounded-xl hover:text-amber-400" title="Store in Secure Locker">
+              <!-- Save to Secure Locker Toggle -->
+              <button onclick="App.toggleComposerVault()" id="btnComposerVault" class="p-2 hover:bg-peach-100 dark:hover:bg-slate-800 rounded-xl hover:text-peach-600 transition" title="Store in Secure Locker">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
               </button>
             </div>
 
             <!-- Done & Close Button -->
             <div class="flex items-center gap-2">
-              <button onclick="App.saveNote()" class="px-5 py-1.5 bg-amber-500 hover:bg-amber-600 text-dark-950 font-semibold rounded-xl text-xs transition">Done</button>
-              <button onclick="App.collapseComposer()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
+              <button onclick="App.saveNote()" class="px-5 py-1.5 bg-peach-500 hover:bg-peach-600 text-white font-semibold rounded-xl text-xs transition shadow-sm active:scale-95">Done</button>
+              <button onclick="App.collapseComposer()" class="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400">Cancel</button>
             </div>
           </div>
         </div>
 
         <!-- Section Title: Pinned Notes -->
         <div id="pinnedSection" class="hidden space-y-3">
-          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pinned</h3>
+          <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pinned</h3>
           <div id="pinnedNotesGrid" class="masonry-grid"></div>
         </div>
 
         <!-- Main Notes Section -->
         <div class="space-y-3">
-          <h3 id="notesSectionTitle" class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Notes</h3>
+          <h3 id="notesSectionTitle" class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Notes</h3>
           <div id="notesGrid" class="masonry-grid"></div>
-          <div id="emptyNotice" class="text-center py-20 text-slate-500 space-y-2">
-            <svg class="w-12 h-12 mx-auto stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div id="emptyNotice" class="text-center py-20 text-slate-400 space-y-2">
+            <svg class="w-12 h-12 mx-auto stroke-1 text-peach-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             <p class="text-sm">No encrypted notes found here.</p>
           </div>
         </div>
@@ -328,12 +354,126 @@
   </div>
 
 
-  <!-- ================= JAVASCRIPT: E2E CRYPTO & CORE ENGINE ================= -->
+  <!-- ================= JAVASCRIPT: LIVE DYNAMIC BACKGROUND ENGINE ================= -->
   <script>
     /**
+     * DYNAMIC LIVE PEACH AURORA ENGINE
+     * Renders smooth, morphing radial gradients that fluidly float across the screen
+     * and subtly respond to mouse movement.
+     */
+    const LiveBackground = {
+      canvas: null,
+      ctx: null,
+      width: 0,
+      height: 0,
+      mouse: { x: window.innerWidth / 2, y: window.innerHeight / 2, targetX: window.innerWidth / 2, targetY: window.innerHeight / 2 },
+      orbs: [],
+
+      init() {
+        this.canvas = document.getElementById('liveBgCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('mousemove', (e) => {
+          this.mouse.targetX = e.clientX;
+          this.mouse.targetY = e.clientY;
+        });
+
+        // Generate glowing peach-tinted nodes
+        const colors = [
+          { r: 255, g: 218, b: 185 }, // Peach Puff
+          { r: 254, g: 200, b: 154 }, // Warm Apricot
+          { r: 255, g: 232, b: 214 }, // Lite Peach Cream
+          { r: 252, g: 213, b: 206 }, // Blush Peach
+          { r: 255, g: 223, b: 186 }  // Soft Melon
+        ];
+
+        this.orbs = Array.from({ length: 7 }, (_, i) => {
+          const c = colors[i % colors.length];
+          return {
+            x: Math.random() * this.width,
+            y: Math.random() * this.height,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            radius: Math.random() * 250 + 200,
+            baseRadius: Math.random() * 250 + 200,
+            color: c,
+            pulseOffset: Math.random() * Math.PI * 2
+          };
+        });
+
+        this.animate();
+      },
+
+      resize() {
+        this.width = this.canvas.width = window.innerWidth;
+        this.height = this.canvas.height = window.innerHeight;
+      },
+
+      animate() {
+        // Soft mouse interpolation
+        this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
+        this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+
+        // Clear canvas with base lite peach tint
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          this.ctx.fillStyle = '#090d16';
+        } else {
+          this.ctx.fillStyle = '#FFF3EC';
+        }
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        const time = Date.now() * 0.001;
+
+        // Draw dynamic live orbs
+        for (const orb of this.orbs) {
+          orb.x += orb.vx;
+          orb.y += orb.vy;
+
+          if (orb.x < -100) orb.x = this.width + 100;
+          if (orb.x > this.width + 100) orb.x = -100;
+          if (orb.y < -100) orb.y = this.height + 100;
+          if (orb.y > this.height + 100) orb.y = -100;
+
+          // Gentle breathing pulsation
+          orb.radius = orb.baseRadius + Math.sin(time + orb.pulseOffset) * 40;
+
+          // Interactive subtle mouse repulsion
+          const dx = this.mouse.x - orb.x;
+          const dy = this.mouse.y - orb.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 300) {
+            orb.x -= (dx / dist) * 1.5;
+            orb.y -= (dy / dist) * 1.5;
+          }
+
+          const grad = this.ctx.createRadialGradient(
+            orb.x, orb.y, 0,
+            orb.x, orb.y, orb.radius
+          );
+
+          if (isDark) {
+            grad.addColorStop(0, `rgba(${orb.color.r * 0.4}, ${orb.color.g * 0.3}, ${orb.color.b * 0.25}, 0.22)`);
+            grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+          } else {
+            grad.addColorStop(0, `rgba(${orb.color.r}, ${orb.color.g}, ${orb.color.b}, 0.55)`);
+            grad.addColorStop(1, 'rgba(255, 243, 236, 0)');
+          }
+
+          this.ctx.beginPath();
+          this.ctx.fillStyle = grad;
+          this.ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+
+        requestAnimationFrame(() => this.animate());
+      }
+    };
+
+
+    /**
      * CRYPTOGRAPHIC CORE ENGINE (Web Crypto API - Zero Server Contact)
-     * Derived Key: PBKDF2 with SHA-256 (100,000 iterations)
-     * Cipher: AES-256-GCM with unique 12-byte IV per encryption
      */
     const CryptoEngine = {
       async deriveKey(pin, saltHex) {
@@ -380,7 +520,7 @@
 
 
     /**
-     * LOCAL INDEXED-DB STORAGE ENGINE (Strictly On-Device)
+     * LOCAL INDEXED-DB STORAGE ENGINE
      */
     const DB = {
       dbName: 'VaultKeep_EncryptedDB',
@@ -448,7 +588,7 @@
 
 
     /**
-     * AUTHENTICATION & MULTI-BIOMETRIC MANAGER
+     * AUTHENTICATION & BIOMETRIC MANAGER
      */
     const Auth = {
       currentPinBuffer: '',
@@ -461,14 +601,11 @@
         const authConfig = await DB.get('config', 'auth_profile');
 
         if (!authConfig) {
-          // Fresh Install / First Run: Show phone registration
           this.showStep('authPhoneStep');
         } else {
-          // Returning User: Direct to PIN / Biometrics
           document.getElementById('pinTitle').innerText = "Unlock VaultKeep";
           document.getElementById('pinSubtitle').innerText = "Enter your 6-digit PIN or use Biometrics.";
           this.showStep('authPinStep');
-          // Auto prompt biometric if credentials registered
           if (authConfig.webAuthnId) {
             setTimeout(() => this.promptBiometricUnlock(), 300);
           }
@@ -518,9 +655,9 @@
         const dots = document.querySelectorAll('.pin-dot');
         dots.forEach((dot, idx) => {
           if (idx < this.currentPinBuffer.length) {
-            dot.classList.add('bg-amber-500', 'border-amber-500');
+            dot.classList.add('bg-peach-500', 'border-peach-500');
           } else {
-            dot.classList.remove('bg-amber-500', 'border-amber-500');
+            dot.classList.remove('bg-peach-500', 'border-peach-500');
           }
         });
       },
@@ -530,11 +667,9 @@
         const authConfig = await DB.get('config', 'auth_profile');
 
         if (!authConfig) {
-          // Setting up new PIN
           this.tempPinCandidate = pin;
           const salt = CryptoEngine.generateSalt();
           const key = await CryptoEngine.deriveKey(pin, salt);
-          // Store verification sentinel
           const verificationToken = await CryptoEngine.encrypt("VAULT_KEEP_SENTINEL", key);
 
           await DB.put('config', {
@@ -549,7 +684,6 @@
           this.clearPin();
           this.showStep('authBiometricSetupStep');
         } else {
-          // Validating Existing User PIN
           try {
             const key = await CryptoEngine.deriveKey(pin, authConfig.salt);
             const decryptedSentinel = await CryptoEngine.decrypt(authConfig.verificationToken, key);
@@ -589,7 +723,6 @@
           if (credential) {
             const authConfig = await DB.get('config', 'auth_profile');
             authConfig.webAuthnId = credential.id;
-            // Store PIN wrapped in local biometric flag
             authConfig.biometricPinKey = this.tempPinCandidate;
             await DB.put('config', authConfig);
             alert('Biometric Key Registered Successfully!');
@@ -637,10 +770,9 @@
           video.srcObject = this.videoStream;
           status.innerText = "ALIGN FACE IN FRAME...";
 
-          // Simulate optical feature mesh matching
           setTimeout(async () => {
             status.innerText = "BIOMETRIC VECTOR MATCHED!";
-            status.classList.remove('text-amber-400');
+            status.classList.remove('text-peach-400');
             status.classList.add('text-emerald-400');
 
             setTimeout(async () => {
@@ -711,8 +843,8 @@
      * MAIN APPLICATION CORE CONTROLLER
      */
     const App = {
-      currentView: 'notes', // notes, vault, archive, trash
-      composerColor: '#1e293b',
+      currentView: 'notes',
+      composerColor: '#ffffff',
       composerIsVault: false,
       composerChecklistData: [],
       composerAttachmentsData: [],
@@ -722,6 +854,7 @@
       activeTagFilter: null,
 
       async init() {
+        LiveBackground.init();
         await Auth.init();
       },
 
@@ -742,10 +875,10 @@
         document.getElementById('composerAttachments').innerHTML = '';
         this.composerChecklistData = [];
         this.composerAttachmentsData = [];
-        this.composerColor = '#1e293b';
-        this.setComposerColor('#1e293b');
+        this.composerColor = '#ffffff';
+        this.setComposerColor('#ffffff');
         this.composerIsVault = false;
-        document.getElementById('btnComposerVault').classList.remove('text-amber-500');
+        document.getElementById('btnComposerVault').classList.remove('text-peach-600');
       },
 
       setComposerColor(color) {
@@ -757,10 +890,10 @@
         this.composerIsVault = !this.composerIsVault;
         const btn = document.getElementById('btnComposerVault');
         if (this.composerIsVault) {
-          btn.classList.add('text-amber-500');
+          btn.classList.add('text-peach-600');
           alert('Locker Mode ON: This note will be double-encrypted into your Secure Locker.');
         } else {
-          btn.classList.remove('text-amber-500');
+          btn.classList.remove('text-peach-600');
         }
       },
 
@@ -776,9 +909,9 @@
         const container = document.getElementById('composerChecklist');
         container.innerHTML = this.composerChecklistData.map((item, index) => `
           <div class="flex items-center gap-2">
-            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="App.composerChecklistData[${index}].done = this.checked" class="rounded bg-slate-900 border-slate-700 text-amber-500">
-            <input type="text" value="${item.text}" oninput="App.composerChecklistData[${index}].text = this.value" placeholder="List item..." class="flex-1 bg-transparent text-xs border-b border-slate-700/60 outline-none">
-            <button onclick="App.removeChecklistItem(${index})" class="text-slate-500 hover:text-rose-400 text-xs">✕</button>
+            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="App.composerChecklistData[${index}].done = this.checked" class="rounded border-peach-300 text-peach-500 focus:ring-peach-400">
+            <input type="text" value="${item.text}" oninput="App.composerChecklistData[${index}].text = this.value" placeholder="List item..." class="flex-1 bg-transparent text-xs border-b border-peach-200 dark:border-slate-700/60 outline-none text-slate-800 dark:text-slate-100">
+            <button onclick="App.removeChecklistItem(${index})" class="text-slate-400 hover:text-rose-500 text-xs">✕</button>
           </div>
         `).join('');
       },
@@ -809,14 +942,14 @@
       renderComposerAttachments() {
         const container = document.getElementById('composerAttachments');
         container.innerHTML = this.composerAttachmentsData.map((att, idx) => {
-          let preview = `<span class="text-[10px] truncate max-w-[120px]">${att.name}</span>`;
+          let preview = `<span class="text-[10px] truncate max-w-[120px] text-slate-700 dark:text-slate-200">${att.name}</span>`;
           if (att.type.startsWith('image/')) {
             preview = `<img src="${att.dataUrl}" class="w-12 h-12 object-cover rounded-lg">`;
           }
           return `
-            <div class="relative bg-slate-800 p-1.5 rounded-xl border border-slate-700 flex items-center gap-2">
+            <div class="relative bg-white/80 dark:bg-slate-800 p-1.5 rounded-xl border border-peach-200 dark:border-slate-700 flex items-center gap-2 shadow-sm">
               ${preview}
-              <button onclick="App.composerAttachmentsData.splice(${idx},1); App.renderComposerAttachments();" class="text-rose-400 text-xs hover:font-bold">✕</button>
+              <button onclick="App.composerAttachmentsData.splice(${idx},1); App.renderComposerAttachments();" class="text-rose-500 text-xs hover:font-bold">✕</button>
             </div>
           `;
         }).join('');
@@ -894,12 +1027,11 @@
           updatedAt: Date.now()
         };
 
-        // ENCRYPTION LAYER: AES-GCM
         const encryptedEnvelope = await CryptoEngine.encrypt(JSON.stringify(notePayload), Auth.activeKey);
         await DB.put('notes', {
           id: notePayload.id,
           payload: encryptedEnvelope,
-          isVault: notePayload.isVault, // Plain tag for indexing view mode
+          isVault: notePayload.isVault,
           isArchived: false,
           isTrash: false,
           updatedAt: notePayload.updatedAt
@@ -977,52 +1109,55 @@
 
       renderNoteCard(note) {
         const checklistHtml = (note.checklist || []).slice(0, 4).map(item => `
-          <div class="flex items-center gap-2 text-xs ${item.done ? 'line-through text-slate-500' : 'text-slate-300'}">
-            <span class="w-1.5 h-1.5 rounded-full ${item.done ? 'bg-slate-500' : 'bg-amber-400'}"></span>
+          <div class="flex items-center gap-2 text-xs ${item.done ? 'line-through text-slate-400' : 'text-slate-600 dark:text-slate-300'}">
+            <span class="w-1.5 h-1.5 rounded-full ${item.done ? 'bg-slate-400' : 'bg-peach-500'}"></span>
             <span class="truncate">${item.text}</span>
           </div>
         `).join('');
 
         const attachmentsHtml = (note.attachments || []).map(att => {
           if (att.type.startsWith('image/')) {
-            return `<img src="${att.dataUrl}" class="rounded-xl w-full h-32 object-cover mb-2">`;
+            return `<img src="${att.dataUrl}" class="rounded-xl w-full h-32 object-cover mb-2 border border-peach-100">`;
           }
           if (att.type.startsWith('audio/')) {
             return `<audio controls src="${att.dataUrl}" class="w-full h-8 mb-2"></audio>`;
           }
-          return `<div class="p-2 bg-slate-900/60 rounded-lg text-xs truncate mb-2">📎 ${att.name}</div>`;
+          return `<div class="p-2 bg-peach-50/70 dark:bg-slate-900/60 rounded-lg text-xs truncate mb-2">📎 ${att.name}</div>`;
         }).join('');
 
         const tagsHtml = (note.tags || []).map(tag => `
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400">#${tag}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-peach-100/70 dark:bg-slate-800/80 border border-peach-200/60 dark:border-slate-700/60 text-peach-700 dark:text-slate-300 font-medium">#${tag}</span>
         `).join('');
 
+        const defaultBg = document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff';
+        const cardBg = note.color || defaultBg;
+
         return `
-          <div class="break-inside-avoid mb-4 rounded-2xl p-4 shadow-lg transition-all duration-200 border border-slate-700/50 hover:shadow-2xl relative group" style="background-color: ${note.color || '#1e293b'}">
+          <div class="break-inside-avoid mb-4 rounded-2xl p-4 shadow-md hover:shadow-xl transition-all duration-200 border border-peach-200/70 dark:border-slate-700/50 relative group backdrop-blur-md" style="background-color: ${cardBg}">
             <!-- Pin Button Top Right -->
-            <button onclick="App.togglePin('${note.id}')" class="absolute top-3 right-3 text-slate-400 hover:text-amber-400 opacity-0 group-hover:opacity-100 transition">
-              <svg class="w-4 h-4 ${note.isPinned ? 'text-amber-400 fill-amber-400' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+            <button onclick="App.togglePin('${note.id}')" class="absolute top-3 right-3 text-slate-400 hover:text-peach-500 opacity-0 group-hover:opacity-100 transition">
+              <svg class="w-4 h-4 ${note.isPinned ? 'text-peach-500 fill-peach-500' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
             </button>
 
             ${attachmentsHtml}
 
-            ${note.title ? `<h4 class="font-bold text-sm tracking-tight text-white mb-1.5 pr-6">${note.title}</h4>` : ''}
-            ${note.content ? `<p class="text-xs text-slate-300 leading-relaxed break-words whitespace-pre-wrap mb-2">${note.content}</p>` : ''}
+            ${note.title ? `<h4 class="font-bold text-sm tracking-tight text-slate-800 dark:text-white mb-1.5 pr-6">${note.title}</h4>` : ''}
+            ${note.content ? `<p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap mb-2">${note.content}</p>` : ''}
             
             ${checklistHtml ? `<div class="space-y-1 my-2">${checklistHtml}</div>` : ''}
             ${tagsHtml ? `<div class="flex flex-wrap gap-1 my-2">${tagsHtml}</div>` : ''}
 
             <!-- Bottom Actions Bar -->
-            <div class="flex items-center justify-between pt-3 mt-2 border-t border-slate-700/40 opacity-0 group-hover:opacity-100 transition text-slate-400 text-xs">
+            <div class="flex items-center justify-between pt-3 mt-2 border-t border-peach-100 dark:border-slate-700/40 opacity-0 group-hover:opacity-100 transition text-slate-400 text-xs">
               <div class="flex items-center gap-2">
-                <button onclick="App.toggleArchive('${note.id}')" title="Archive Note" class="hover:text-slate-200">
+                <button onclick="App.toggleArchive('${note.id}')" title="Archive Note" class="hover:text-slate-700 dark:hover:text-slate-200">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                 </button>
-                <button onclick="App.moveToVault('${note.id}')" title="Send to Locker" class="hover:text-amber-400">
+                <button onclick="App.moveToVault('${note.id}')" title="Send to Locker" class="hover:text-peach-600">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </button>
               </div>
-              <button onclick="App.deleteNote('${note.id}')" title="Delete Note" class="hover:text-rose-400">
+              <button onclick="App.deleteNote('${note.id}')" title="Delete Note" class="hover:text-rose-500">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
               </button>
             </div>
@@ -1086,7 +1221,6 @@
 
       async setView(view) {
         if (view === 'vault' && !this.currentVaultUnlocked) {
-          // Secondary verification for Dedicated Secure Locker
           const pass = prompt("SECURE LOCKER ACCESS:\nPlease enter your 6-digit Master PIN or Biometric authorization to unlock this vault:");
           if (!pass) return;
           try {
@@ -1105,13 +1239,13 @@
 
         this.currentView = view;
         document.querySelectorAll('.nav-item').forEach(el => {
-          el.classList.remove('bg-amber-500/10', 'text-amber-400');
-          el.classList.add('text-slate-400');
+          el.classList.remove('bg-peach-500/15', 'text-peach-600', 'font-semibold');
+          el.classList.add('text-slate-600', 'dark:text-slate-400');
         });
         const currentNav = document.getElementById(`nav-${view}`);
         if (currentNav) {
-          currentNav.classList.add('bg-amber-500/10', 'text-amber-400');
-          currentNav.classList.remove('text-slate-400');
+          currentNav.classList.add('bg-peach-500/15', 'text-peach-600', 'font-semibold');
+          currentNav.classList.remove('text-slate-600', 'dark:text-slate-400');
         }
 
         const composer = document.getElementById('composerCard');
@@ -1130,7 +1264,7 @@
         const tags = new Set();
         (this.cachedNotes || []).forEach(n => (n.tags || []).forEach(t => tags.add(t)));
         labelsContainer.innerHTML = Array.from(tags).map(tag => `
-          <button onclick="App.filterByTag('${tag}')" class="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs ${this.activeTagFilter === tag ? 'text-amber-400 font-bold bg-amber-500/10' : 'text-slate-400 hover:bg-slate-800'}">
+          <button onclick="App.filterByTag('${tag}')" class="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs ${this.activeTagFilter === tag ? 'text-peach-600 font-bold bg-peach-500/15' : 'text-slate-600 dark:text-slate-400 hover:bg-peach-100 dark:hover:bg-slate-800'}">
             <span>#</span>
             <span class="truncate">${tag}</span>
           </button>
